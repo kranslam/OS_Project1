@@ -1,6 +1,8 @@
 // closh.c - COSC 315, Winter 2020
 // YOUR NAME HERE
 
+#include <sys/types.h>
+#include<sys/wait.h> 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -40,6 +42,7 @@ int main() {
 
 		// begin parsing code - do not modify
 		printf("closh> ");
+		fflush(stdout);
 		fgets(cmd, sizeof(cmd), stdin);
 		if (cmd[0] == '\n')
 			continue;
@@ -76,37 +79,46 @@ int main() {
 		if (parallel) {
 			// execute program in parallel
 
+			while(count-- > 0) {
+				pid_t forkPid = fork();
+
+				// check if process is parent or child (pid is zero when child)
+				if(!forkPid) {
+					// print process ID
+					printf("Process ID: %d\n", getpid());
+					fflush(stdout);
+					// execute command
+					execvp(cmdTokens[0], cmdTokens);
+					// exit process to prevent duplicate child processes
+					exit(0);
+				}
+
+				// check if fork command returns error (-1)
+				if(forkPid < 0) {
+					printf("uh oh\n");
+					perror("fork");
+			    	abort();
+				}
+			}
+
+			wait(NULL);
+
 		} else {
 			// execute program in series
 
-			// array to store all thread ids
-			pid_t pids[count];
-
 			for (int i = 0; i < count; ++i) {
-				// check if fork command returns error (-1)
-				if ((pids[i] = fork()) < 0) {
-			    printf("uh oh\n");
-				  perror("fork");
-			    abort();
-
-			    // check if current process is a child process
-			  } else if (pids[i] == 0) {
-				  // execute command
-				  execvp(cmdTokens[0], cmdTokens);
-				  // exit process to prevent duplicate child processes
-				  exit(0);
-			  }
+				// print process ID
+				pid_t forkPid = fork();
+				if(!forkPid) {
+					// print process ID
+					printf("Process ID: %d\n", getpid());
+					// execute command
+					execvp(cmdTokens[0], cmdTokens);
+				} else {
+					wait(NULL);
+				}
 			}
 		}
-
-
-		// just executes the given command once - REPLACE THIS CODE WITH YOUR OWN
-	//	execvp(cmdTokens[0], cmdTokens); // replaces the current process with the given program
-		// doesn't return unless the calling failed
-
-		// only parent process should make it here
-	//	printf("Can't execute %s\n", cmdTokens[0]); // only reached if running the program failed
-	//	exit(1);
 	}
 }
 
