@@ -1,5 +1,5 @@
 # OS_Project1
-**Group 21**
+**Group 21** <br>
 Repo for Project 1 of COSC 315.
 ## Contributions
 **Kyle Ranslam:** Parallel and Sequential Code<br>
