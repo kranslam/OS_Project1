@@ -1,5 +1,6 @@
 # OS_Project1
-
+**Group 21**
+Repo for Project 1 of COSC 315.
 ## Contributions
 **Kyle Ranslam:** Parallel and Sequential Code<br>
 **David Ding:** Parallel and Sequential Code<br>
