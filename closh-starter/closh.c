@@ -42,7 +42,7 @@ int main() {
 	while (TRUE) { // main shell input loop
 
 		// begin parsing code - do not modify
-		printf("closh> ");
+		printf("\nclosh> ");
 		fflush(stdout);
 		fgets(cmd, sizeof(cmd), stdin);
 		if (cmd[0] == '\n')
@@ -76,33 +76,38 @@ int main() {
 		// TODO an optional timeout must be implemented 0 = no timeout, 1-9 = duration of timeout
 		// the timeout dictates the maximum duration of each process
 
-		// check if program is serial or parallel
 		clock_t current, endtime;
 		current = clock();// gets current clock cycles
 		if(timeout>0){//only initializes if timeout = 0
-		endtime = (timeout * CLOCKS_PER_SEC)+current;//gets how many cpu sycles should have elapse as timeout 
+		endtime = (timeout * CLOCKS_PER_SEC)+current;//gets how many CPU cycles should have elapse as timeout
 		}else{
 			endtime = -1;
 		}
 		
-	
+		// check if program is serial or parallel
 		if (parallel) {
 			// execute program in parallel
 
 			while(count-- > 0) {
 				pid_t forkPid = fork();
 
-				//checks at start if a timeout has occurred
-				if(clock() >= endtime && endtime !=-1){
-					printf("timeout occured\n"); fflush(stdout);
-					kill(0, SIGKILL);
+				// check if fork command returns error (-1)
+				if(forkPid < 0 ) {
+					printf("uh oh\n");
+					perror("fork");
+			    	abort();
 				}
 
+				// checks at start if a timeout has occurred
+				if(clock() >= endtime && endtime !=-1){
+					printf("timeout occurred\n"); fflush(stdout);
+					kill(0, SIGKILL);
+				}
 				// check if process is parent or child (pid is zero when child)
 				if(!forkPid) {
 					//checks if a timeout has occurred
 					if(clock() >= endtime && endtime !=-1){
-					printf("timeout occured\n"); fflush(stdout);
+					printf("timeout occurred\n"); fflush(stdout);
 					kill(0, SIGKILL);
 				}
 					// print process ID
@@ -114,32 +119,34 @@ int main() {
 					exit(0);
 				}
 
-				// check if fork command returns error (-1)
-				if(forkPid < 0 ) {
-					printf("uh oh\n");
-					perror("fork");
-			    	abort();
-				}
+
 			}
 
 			wait(NULL);
 
 		} else {
-			//checks at start if a timeout has occurred
+			// checks at start if a timeout has occurred
 			if(clock() >= endtime && endtime !=-1){
-					printf("timeout occured\n"); fflush(stdout);
+					printf("timeout occurred\n"); fflush(stdout);
 					kill(0, SIGKILL);
 				}
 			// execute program in series
-
 			for (int i = 0; i < count; ++i) {
 				//checks at start of loop if a timeout has occurred
 				if(clock() >= endtime && endtime !=-1){
-					printf("timeout occured\n"); fflush(stdout);
+					printf("timeout occurred\n"); fflush(stdout);
 					kill(0, SIGKILL);
 				}
 				// print process ID
 				pid_t forkPid = fork();
+
+				// check if fork command returns error (-1)
+							if(forkPid < 0 ) {
+								printf("uh oh\n");
+								perror("fork");
+						    	abort();
+							}
+
 				if(!forkPid) {
 					// print process ID
 					printf("Process ID: %d\n", getpid());
