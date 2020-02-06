@@ -6,7 +6,7 @@ Repo for Project 1 of COSC 315.
 **David Ding:** Parallel and Sequential Code<br>
 **Devon MacNeil:** Timeouts<br>
 
-## Desgin Choices
+## Design Choices
 
 ### Parallel Code
 The program first checks whether the forks are to be executed in parallel or serially. <br>
